@@ -1,0 +1,646 @@
+I. Что за что отвечает, подключение и т.д.
+
+************************************        # сайт по свойствам CSS/HTML
+http://htmlbook.ru/
+
+
+************************************        # подключаем фаил CSS
+<link href="/app.css" rel="stylesheet">
+************************************************************************************************************
+************************************************************************************************************
+************************************        #
+-----------------                           #
+-----------------
+
+
+
+II. Правила/Определения
+
+************************************        # правила/советы
+Верстка идёт сверху вниз, слева на право!
+
+-----------------                           # используется в самом фаиле Views/Layouts
+селектор {
+  свойство: значение;
+  свойство: значение;
+  свойство: значение;
+  свойство: значение;
+}
+
+-----------------
+.first {}                                   # . - означает класс, обращение к HTML страницы к конкретному <p class="first"></p>
+#first {}                                   # # - означает класс, обращение к HTML страницы к конкретному <p id="first"></p>
+
+-----------------
+.png используется, когда под картинкой, прозрачный фон
+.jpg во всех остальных случаях
+
+-----------------                           # правило ко всему тому, что находится в body
+body {}
+
+-----------------                           # .menu li означает обращаемся к блоку menu и ко всем лишкам вложенных в него!
+.menu li {}
+
+-----------------                           #.services_item: last-child - т.к. блоков .services_item много, и чтобы не добавлять конкретики, можно фразой last-child - обратиться к последнему блоку
+.services_item: last-child {}
+
+-----------------                           # nth-child(2) - обращаемся ко второму блоку! это специальная конструкция
+.services_item: nth-child(2) {}
+
+-----------------                           # clearfix - применять ко всем контейнерам, если имеется float! (<div class="works clearfix"></div>)
+.clearfix:after {
+  content: '';
+  display: table;
+  width: 100%;
+  clear: both;
+}
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+III. Определения
+
+-----------------                           # добавление фотографии и их нюансы
+no-repeat                                   - не повторять изображение много раз
+background                                  - задний фон
+background: #fff url(../папка_где_лежит/название.jpg/png)   - сначала загрузится цвет, а потом картинка (это сделано для того, чтобы небыло пуcтого места, пока подгружается картинка!)
+background: url() no-repeat center top / cover;             - сделать картинку задним фоном, не повторять, расположить по центру, растянуть на всю площадь
+
+
+************************************        # позицирование объекта
+height: 100vh;                              - делает картинку на весь экран, подстраивается под любое разрешения!
+display: block;                             - описываем размеры кнопки
+
+center top                                  - разположение картинки относительно всех плоскостей
+cover                                       - растянуть картинку на весь экран, на любом мониторе
+float                                       - расположение, по горизонтали
+float: left;                                - расположить слева
+
+
+************************************        # работа с размерами объекта
+padding                                     - отступы внутри элемента
+padding: 20px 10px 50px 5px;                - означает, что отступы идут сверху - справа - снизу - слева
+padding: 20px;                              - означает со всех сторон, отступ 20px
+padding: 20px 0px;                          - читается как, 20px сверху, 0px справа и 20px снизу, 0px влева
+padding-bottom: 160px;                      - означает, если мы хотим картинку закончить и пойдёт дальше другая картинка
+
+margin                                      - отступ наружу, от других объектов
+margin: 50px;                               - отступ наружу, от других объектов
+margin-top: 50px;                           - отступ всего бара, на 50px сверху
+margin-right: 40px;                         - отступ каждой лишки друг от друга по 40px
+margin: 0 auto;                             - границы 0 и выставить кнопку по центру
+
+-----------------
+border-radius: 3px;                         - радиус закругления
+border: none;                               - без границ
+
+-----------------
+box-sizing: border-box;                     - позволяет не деформировать внутренние границы, из-за изменения отступов и т.д.
+
+
+************************************        # работа с текстом
+text-decoration                             - 
+text-transform                              - 
+text-align                                  - 
+text-decoration: none;                      - убирает подчёркивание, при наводке на ссылку
+text-decoration: underline;                 - нижнее подчёркивание
+text-transform: uppercase;                  - делает все буквы БОЛЬШИМИ
+text-align: center;                         - выставить текст по центру
+
+-----------------
+font-weight                                 - 
+font-weight                                 - 
+font-size                                   - размер шрифта
+font-weight: bold;                          - означает, что шрифт будет жирным
+font-family: Arial, sans-serif;             - означает подгрузку шрифта Arial, но если вдруг он не загрузился, то загрузится sans-serif(там куча всех шрифтов) 
+font-size: 14px;                            - общий размер, самого текста,  и т.д.;
+
+-----------------
+line-height: 1.6em;                         - отступы текста, друг от друга по вертикали
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+IV. Заготовка
+
+body {
+  padding: 0px;
+  margin: 0px;
+  font-family: подключаем шрифты нужные
+}
+
+div, p, input, button {
+  box-sizing: border-box;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 1.6em;
+  line-height: 1.38em;
+}
+
+article {
+  width: 1170px;
+  margin: 0px auto;
+  position: relative;
+}
+
+.clearfix:after {
+  content: '';
+  display: table;
+  width: 100%;
+}
+
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+V. Кодинг
+=====================================
+body {
+  всё что входит в body, используется по умолчанию на всё сайте
+  сюда включить можно шрифт и т.д.
+  тут font-family: Arial, sans-serif; означает подгрузку шрифта Arial,
+  но если вдруг он не загрузился, то загрузится sans-serif(там куча всех шрифтов)
+  padding - отступы внутри элемента
+  margin - отступ наружу, от других объектов
+
+  font-family: Arial, sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+-----------------
+div {
+  позволяет не деформировать внутренние границы, из-за изменения отступов и т.д.
+
+  box-sizing: border-box;
+}
+
+-----------------
+.test {
+  здесь граница 300px, но из-за padding: 20px - граница станет 300+20+20=340px
+  но так как тест вложен в div - а в див, мы ввели условия, не менять внутренние границы
+  из-за этого, граница в 300px - будет соблюдена!
+  padding: 20px 10px 50px 5px - означает, что отступы идут сверху - справа - снизу - слева
+  padding: 20px - означает со всех сторон, отступ 20px
+  margin: 50px - отступ наружу, от других объектов
+
+  width: 300px;
+  height: 100px;
+  background: #fff;
+  padding: 20px;
+  margin: 50px;
+}
+
+-----------------
+header {
+  no-repeat   - не повторять изображение много рас
+  center top  - разположение картинки относительно всех плоскостей
+  cover   - растянуть картинку на весь экран, на любом мониторе
+  padding-bottom: 160px; - означает, если мы хотим картинку закончить и пойдёт дальше другая картинка
+  height: 100vh; - делает картинку на весь экран, подстраивается под любое разрешения!
+  background: #fff url(../папка_где_лежит/название.jpg/png) - сначала загрузится цвет, а потом картинка (это сделано для того, чтобы небыло путого места, пока подгружается картинка!)
+
+  background: url(../папка_где_лежит/название.jpg/png) no-repeat center top / cover;
+  padding-bottom: 160px;
+}
+
+-----------------
+.container {
+  width: 930px;
+  margin: 0 auto;
+}
+
+-----------------
+.logo {
+  float - расположение, по горизонтали
+
+  margin-top: 41px;
+  float: left;
+}
+
+-----------------
+nav {
+  margin-top: 50px - отступ всего бара, на 50px сверху
+
+  margin-top: 50px;
+  float: right;
+}
+
+-----------------
+.menu li {
+  .menu li означает обращаемся к блоку menu и ко всем лишкам вложенных в него!
+  display: block - это 
+  margin-right: 40px - отступ каждой лишки друг от друга по 40px
+
+  float: left;
+  display: block;
+  margin-right: 40px;
+}
+
+-----------------
+.menu a {
+  text-decoration: none - убирает подчёркивание, при наводке на ссылку
+  text-transform: uppercase - делает все буквы БОЛЬШИМИ
+  font-size: 14px - общий размер, самого текста и т.д.;
+  text-align: center - выставить текст по центру
+
+  color: #fff;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+-----------------
+.button {
+  border-radius: 3px - радиус закругления
+  display: block - описываем размеры кнопки
+  padding: 20px 0px - читается как, 20px сверху, 0px справа и 20px снизу, 0px влева
+  margin: 0 auto - границы 0 и выставить кнопку по центру
+  font-weight: bold - означает, что шрифт будет жирным
+
+  background: yellow;
+  color: black;
+  border-radius: 3px;
+  display: block;
+  width: 240px;
+  padding: 20px 0px;
+  margin: 0 auto;
+  text-decoration: none;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 18px;
+  margin-top: 50px;
+}
+
+-----------------
+.services {
+  
+}
+
+-----------------
+.services_item {
+  
+}
+
+-----------------
+.services_item h3 {
+
+}
+
+-----------------
+.services_item p {
+  line-height: 1.6em - отступы текста, друг от друга по вертикали
+
+  color: blue;
+  font-size: 14px;
+  line-height: 1.6em;
+}
+
+-----------------
+.services_item: last-child {
+  .services_item: last-child - т.к. блоков .services_item много, и чтобы не добавлять конкретики, можно
+  фразой last-child - обратиться к последнему блоку
+
+  float: right;
+}
+
+-----------------
+.services_item: nth-child(2) {
+  nth-child(2) - обращаемся ко второму блоку! это специальная конструкция
+
+  margin-left: 60px;
+}
+
+-----------------
+clearfix - применять ко всем контейнерам, если имеется float! (<div class="works clearfix"></div>)
+.clearfix:after {
+  content: '';
+  display: table;
+  width: 100%;
+  clear: both;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+************************************        # РАЗОБРАТЬ!!
+@import url(http://fonts.googleapis.com/css?family=Lora|Ubuntu:300,400,500); 
+@import "bootstrap-sprockets";
+@import "bootstrap";
+
+/* Variables, mixins, etc.. */
+
+@mixin background-tile {
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 3px 3px 5px 6px #ccc;
+  padding: 1.5em 1.25em;
+}
+
+
+/* General styles */
+
+body {
+  background-color: #f5f5f5;
+  font-family: 'Lora', serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 300;
+}
+
+p.alert, p.notice {
+  margin: 0;
+}
+
+
+/* Navbar/navigation styles */
+
+.navbar {
+  font-family: 'Ubuntu', sans-serif;
+  text-transform: uppercase;
+}
+.navbar-default {
+  background-color: #fff;
+  padding-bottom: 5px;
+  padding-top: 5px;
+
+  .navbar-nav > li > a {
+    color: #222;
+    &:hover {
+      color: darken(#f1c40f, 5%);
+      transition: 0.5s;
+    }
+  }
+
+  .navbar-header {
+
+    .navbar-brand {
+      color: #222;
+      letter-spacing: 1.4px;
+    }
+
+  }
+
+  .dropdown-menu > li > a:hover {
+    background-color: darken(#f1c40f, 5%);
+    color: #fff;
+  }
+
+  .navbar-nav > .open > a, .navbar-nav > .open > a:hover, .navbar-nav > .open > a:focus {
+    background-color: darken(#f1c40f, 5%);
+    color: #fff;  
+  }
+
+}
+
+.dropdown-menu > .active > a {
+  background-color: #f1c40f;
+  color: #fff;
+}
+
+
+/* Button/link styles */
+
+.btn-custom {
+  color: darken(#f1c40f, 5%);
+  background-color: #fff;
+  border: 1px solid darken(#f1c40f, 5%);
+  padding: 8px 20px;
+  border-radius: 5px;
+  font-family: 'Ubuntu', sans-serif;
+  &:hover {
+    text-decoration: none;
+    background-color: darken(#f1c40f, 5%);
+    color: #fff;
+    transition: 0.5s;
+  }
+}
+
+.btn-custom2 {
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #222;
+  padding: 8px 20px;
+  border-radius: 5px;
+  font-family: 'Ubuntu', sans-serif;
+  &:hover {
+    text-decoration: none;
+    background-color: #333;
+    color: #fff;
+    transition: 0.5s;
+  } 
+}
+
+.links {
+
+  .btn-custom {
+    padding: 3px 10px;
+    font-weight: 300;
+  }
+
+}
+
+.book-links {
+
+  .btn-custom {
+    padding: 3px 10px;
+    font-weight: 300;
+    margin-top: 40px; 
+  }
+
+}
+
+/* Book styles */
+
+.book {
+  height: 350px;
+  width: 250px;
+  margin-bottom: 40px;
+  @include background-tile;
+}
+
+.book-show {
+  height: 475px;
+  width: 325px;
+  @include background-tile;
+}
+
+.book-info {
+  @include background-tile;
+
+  .book-title {
+    margin-top: 0;
+    font-size: 2em;
+  }
+
+  .avg-rating {
+    font-size: 1.5em;
+    margin-top: 15px;
+    margin-bottom: 5px;
+  }
+
+  .number-of-reviews {
+    font-size: 0.85em;
+    font-style: italic;
+  }
+
+  .book-author {
+    font-size: 1.5em;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    span {
+      font-size: 0.80em;
+    } 
+  }
+
+  .book-desc {
+    font-size: 1.05em;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    margin-top: 15px;
+  }
+
+}
+
+
+/* current-category styles */
+
+.current-category {
+  margin-bottom: 40px;
+}
+
+
+/* Reviews styles */
+
+.reviews {
+
+  @include background-tile;
+  margin-top: 40px;
+
+  h1 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 2em;
+  }
+
+  .review {
+    border-bottom: 1px solid gainsboro;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+
+    .review-comment {
+      font-size: 1.05em;
+      line-height: 1.5;
+    }
+
+  }
+
+  .new-review {
+    padding-top: 8px;
+  }
+
+}
+
+/* New Book Form styles */
+
+.new-book-form {
+  @include background-tile;
+
+  h1 {
+    margin-top: 0;
+  }
+
+  #category_id {
+    margin-bottom: 10px;
+  }
+
+  #book_book_img {
+    margin-bottom: 10px;
+  }
+
+}
+
+
+/* Edit Book Form styles */
+
+.edit-book-form {
+
+  @include background-tile;
+
+  h1 {
+    margin-top: 0;
+  }
+
+  #book_category_id {
+    margin-bottom: 10px;
+  }
+
+  #book_book_img {
+    margin-bottom: 10px;
+  }
+
+}
+
+/* New/Edit review form styles */
+
+.new-review-form, .edit-review-form {
+  @include background-tile;
+
+  h1 {
+    margin-top: 0;
+  }
+
+  #rating-form {
+    margin-bottom: 15px;
+
+    label {
+      display: block;
+    }
+
+  }
+
+}
+
+
+/* Signup/Login form styles */
+
+.signup-form {
+  @include background-tile;
+
+  h2 {
+    margin-top: 0;
+  }
+
+}
+
+.login-form {
+  @include background-tile;
+
+  h2 {
+    margin-top: 0;
+  }
+
+}
+************************************************************************************************************
+************************************************************************************************************

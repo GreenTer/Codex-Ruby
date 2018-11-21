@@ -1,0 +1,143 @@
+I. Определения
+
+************************************        # работа с методами
+<%= form_for() %>                           <- 
+<%= simple_form_for() %>                    <- это гем (gem 'simple_form') в котором много своих плюшек
+
+-----------------                           # как правильно связывать сущности
+<%= form_for([@article, @article.comments.build]) do |f| %> - Форма которая создаётся для связанных друг с другом сущностей (получится /articles/3/comments)
+@article.comments.build                                     - коллекция Collection
+
+************************************        # ROUTES
+<a href="/articles">Show all articles</a>                              - так можно - но так не правильно (если поменяется что-то, то она будет битой)
+<%= link_to 'Show all articles', articles_path %>                      - правильное добавление ссылки
+<%= link_to 'Show', article_path(article) %>                           - article (это :id конкретное) в контексте <% @articles.each do |article| %>
+<%= link_to 'Sign Out!', destroy_user_session_path, method: :delete %> - в этом варианте, нужно добавить конкретный метод! (смотреть какой путь идёт в табличке!) у нас на выход был метод DESTROY - он же и delete, это нужно указать! method: :delete
+
+-----------------
+<%= link_to 'X', destroy_user_session_path/вариант/вариант/, method: :delete/вариант/new/create/edit/update/show/index %>
+
+-----------------
+<%= render 'form' %>                        <- делаем обращение к выводу формы, которая содержится в другом фаиле _form.html.erb
+
+
+************************************        # как обратиться к конкретной строчке
+пример: <p class="something" id="rating-form">We are open!</p>
+
+-----------------                           # в этом же фаиле!
+<script>                                    
+  $('#rating-form').raty({
+    path: '/assets/',
+    scoreName: 'review[rating]'
+  });
+</script>
+
+-----------------                           # STYLESHEETS
+.something                                  <- через Stylesheets
+
+
+************************************        # давать определения полям
+<%= f.input :author, label: "Автор" %>      <- тут использовать label: и в лбюбом другом случае (кроме f.button)
+<%= f.button :submit, "Опубликовать"        <- в f.button label: не нужен!! просто после запятой писать в кавычках что хотим!
+
+
+************************************        # всякое
+<%= truncate(@переменная, length: 20) %>    <- сокращает текст до 20символов, дальше будет ...
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+II. Кодинг
+
+************************************        #  работа с simple_form
+<%= simple_form_for @book, :html => { :multipart => true } do |f| %>                          <- :html => { :multipart => true } - подключили HTML
+  <%= select_tag(:category_id, options_for_select(@categories), :prompt => "Жанр книги") %>   <- присвоить :category_id, что выберится из параметра @categories (пункт_выбора(:category_id, опция_для_выделения(из параметра @categories), :prompt => "" используется с options_for_select, и ему задаётся кначение вместо пустой строки))
+  <%= f.file_field :book_img %>
+  <%= f.input :title, label: "Название книги" %>
+  <%= f.input :author, label: "Автор" %>
+  <%= f.input :description, label: "Описание" %>
+
+  <%= f.button :submit, "Опубликовать", :class => 'btn-custom2' %>
+<% end %>
+
+-----------------
+<%= simple_form_for([@book, @book.reviews.build]) do |f| %>
+  <div id="rating-form">
+    <label>Рейтинг </label>
+  </div>
+  <%= f.input :comment, label: "Комментарий" %>
+  <%= f.button :submit, "Опубликовать", :class => 'btn-custom2' %>
+<% end %>
+
+-----------------
+<%= simple_form_for([@book, @review]) do |f| %>
+  <div id="rating-form">
+    <label>Рейтинг </label>
+  </div>
+  <%= f.input :comment, label: "Комментарий" %>
+  <%= f.button :submit, "Изменить", :class => 'btn-custom2' %>
+<% end %>
+
+
+************************************        # пример
+<%= params[:category] %>                    <- выбрали до перехода сюда, конкретную категорию
+
+<% if @book.count == 0 %>                   <- содержит 0 элементов
+
+  <h1>К сожалению в этом жанре книг нет..</h1>
+
+<% else %>
+
+  <% @book.each do |book| %>
+    <%= link_to book.title, book_path(book) %>  <- выводим все книги из данной категории
+  <% end %>
+
+<% end %>
+
+-----------------
+<% @book.each do |book| %>
+
+  <div class="col-md-3">
+    <a href="/books/<%= book.id %>">
+      <%= image_tag book.book_img.url(:book_index), class: "book" %>
+    </a>
+  </div>
+
+<% end %>
+
+
+************************************        # пример
+<%= render @book.reviews %>                 <- вывести отзывы, которые содержатся в @book (вывести все @book.reviews)
+
+<% if user_signed_in? %>                    <- создали условие, если пользователь залогинился
+  <% if @book.user_id == current_user.id %> <- если переменная_с_юзер_id ровняется теперешнему пользователю, то
+
+    <%= link_to "Корректировка книги", edit_book_path(@book) %>
+    <%= link_to "Удалить книгу", book_path(@book), method: :delete, data: { confirm: "Вы уверены?!" } %>
+
+  <% end %>
+<% end %>
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+************************************************************************************************************
+************************************************************************************************************
+************************************        # 

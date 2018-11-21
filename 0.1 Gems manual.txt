@@ -1,0 +1,154 @@
+I. Gems и что они значат
+
+************************************        # RakeFile + https://rubygems.org + в каждом геме, есть Home Page -> там расписаны все нюансы!
+gem 'simple_form', '~> 4.0', '>= 4.0.1'     <- хороший аддон, для работы с БД миграции
+gem 'bootstrap-sass', '~> 3.3', '>= 3.3.7'  <- оформление bootstrap
+gem 'jquery-rails', '~> 4.3', '>= 4.3.3'    <- 
+gem 'coffee-script-source', '1.8.0'         <- 
+gem 'devise', '~> 4.4', '>= 4.4.3'          <- аддон для регистрации (см. примечание)
+
+-----------------
+gem 'bcrypt', '3.1.11'                      <- gem для аутентификации (devise) + зависимый ресурс от ошибок (bcrypt) (https://habrahabr.ru/post/208056/ статья по настройке)
+gem 'devise'                                <- gem для аутентификации (devise) + зависимый ресурс от ошибок (bcrypt) (добавляем в GemFile ('~> 1.0.6' мб версия для )руби 2.3.х)
+
+-----------------
+gem 'paperclip', '~> 6.0.0'                 <- gem для работы с картинками
+
+
+************************************        # порядок действий, установка
+bundle install                              <- подгоняем все гемы друг под дружку
+rails g                                     <- (cmd) показывает все генераторы рельс, проверяем что всё работает (если не работает)
+
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+II. Установка и нюансы Gems
+
+************************************        # (gem 'bootstrap-sass' и gem 'simple_form')
+
+-----------------                           # добавить строки в фаил (\assets\stylesheets\application.css) <- + переименовывем в application.css.scss
+@import "bootstrap-sprockets";
+@import "bootstrap";
+
+-----------------
+добавить строки в фаил (\app\assets\javascripts\application.js)
+//= require jquery
+//= require bootstrap-sprockets
+
+-----------------
+(cmd) rails generate simple_form:install --bootstrap
+
+-----------------                           # варианты кода
+<%= f.file_field :book_img %>               <- добавили для функции добавить картинку
+
+<%= simple_form_for(@user, html: { class: 'form-inline' }) do |form| %>
+
+
+************************************        # (gem 'devise')
+rails generate devise:install
+
+-----------------                           # добавить строки в фаил (\app\views\layouts\application.html.erb) в <body>
+  <p class="notice"><%= notice %></p>
+  <p class="alert"><%= alert %></p>
+  <%= yield %>
+
+-----------------
+(cmd) rails g devise:views
+
+-----------------
+rails generate devise и имя (к примеру User)
+
+-----------------
+rake db:migrate
+
+
+************************************        # (coffee-script) ЕСЛИ ВЫСКОЧИТ ОШИБКА НА ХОСТЕ localhost:3000 (сделать для проверки!)
+Add in blog/GemFile the coffee-script-source v1.8.0 (v1.9.0 does not work on Windows)
+
+#For Windows it works with CofferScript v1.8
+gem 'coffee-script-source', '1.8.0'
+-----------------
+Stop the server (if it was running) and do:
+
+(cmd) bundle update coffee-script-source
+(cmd) bundle install
+(cmd) rails generate simple_form:install --bootstrap
+
+
+************************************        # (paperclip)
+
+-----------------                           # добавить в (config/environments/development.rb)
+Paperclip.options[:command_path] = "/usr/local/bin/"
+
+-----------------                           # добавить в Model с которой работаем + меняем имена которые создали (:book_img\:book_index\:book_show)
+  has_attached_file :book_img, styles: { book_index: "250x350>", book_show: "326x475>" }, default_url: "/images/:style/missing.png"
+  validates_attachment_content_type :book_img, content_type: /\Aimage\/.*\z/
+
+-----------------                           # (cmd) создаст миграцию для работы с картинками
+rails generate paperclip Book book_img
+
+-----------------                           # (cmd) обновить БД
+rake db:migrate
+
+
+************************************        # (bcrypt)
+
+-----------------                           # если вылезли ошибки
+  gem uninstall bcrypt                      - удалить гем
+  gem install bcrypt --platform=ruby        - переустанавливаем гем вручную!
+  bundle install                            - подгоняем все гемы друг под дружку
+  rails g                                   - если ошибок нет, то этой командой будет всё видно!
+
+  "I solved it based on hellriders solution.First of all comment out # gem bcrypt, '3.1.11' and run bundle install.After that uninstall the gem with gem uninstall bcrypt.Then re-install gem install bcrypt --platform=ruby.The important part, un-comment gem 'bcrypt', '~> 3.1.11', platforms: [:ruby, :x64_mingw, :mingw] and then bundle install.Thats it.Note the mingw part at the end.This should be the key."
+
+-----------------                           # если ошибки не вылезло/или сделан пункт выше
+rails g devise:install                      - (cmd) установить генератор devise
+rails g devise User                         - (cmd) создать блок для регистрации пользователя и т.д.
+rake db:migrate                             - (cmd) залить эту базу данных
+rails g devise:views                        - (cmd) загрузить фаилы devise вщ views, а там менять формы и т.д.
+
+-----------------                           # добавить в фаил \config\environments\development.rb
+config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+
+-----------------                           # добавить в фаил \config\routes.rb
+root to: "home#index"
+
+-----------------                           # добавить в фаил \app\views\layouts\application.html.erb в body
+<p class="notice"><%= notice %></p>
+<p class="alert"><%= alert %></p>
+
+-----------------                           # добавить в фаил \app\controllers\в-какой-хочешь-фаил.rb
+before_action :authenticate_user!, :except => [:index]
+
+-----------------                           # на проверку, пользователь залогинился и т.д.
+<% if user_signed_in? %>
+  <%= link_to 'Sign Out', destroy_user_session_path, method: :delete %>
+<% else %>
+  <%= link_to 'Sign In', new_user_session_path %>
+<% end %>
+
+-----------------                           # добавляем в app/controllers/aplication_controller.rb
+  before_action :configure_permitted_parameters, if: :devise_controller?
+
+  protected
+
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:nikname, :first_name, :last_name, address_attributes: [:country, :state, :city, :area, :postal_code]])
+    devise_parameter_sanitizer.permit(:sign_in, keys: [:nikname, :first_name, :last_name, address_attributes: [:country, :state, :city, :area, :postal_code]])
+    devise_parameter_sanitizer.permit(:account_update, keys: [:nikname, :first_name, :last_name, address_attributes: [:country, :state, :city, :area, :postal_code]])
+  end
+
+
+
+III. Подключение шрифтов
+
+************************************            # (font-face) добавить строки в фаил (\assets\stylesheets\application.css) <- + переименовывем в application.css.scss
+@import url(http://fonts.googleapis.com/css?family=Oswald:400,700|Merriweather:400,300);
+
+
+************************************            # (font-awesome) добавить строки в фаил (app\views\layouts\application.html.erb) <head></head>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+************************************************************************************************************
+************************************************************************************************************

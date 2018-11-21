@@ -1,0 +1,188 @@
+I. Определения
+
+************************************        # ROUTES
+render                                      - возвращает какие-то данные (не прерывая комманды)! (использовать, при заполнении данных - клиент в барбер шоп к примеру)
+render action: 'new'                        - возврат то что генерирует action: 'new' (new.html.erb)
+redirect_to                                 - прерывает комманду и возвращает, на исходное положение условий (использовать от 2ных submit, оплата картой к примеру)
+redirect_to xxx_path(@xxx)                  - прерывает комманду и возвращает, на исходное положение условий (путь)
+
+-----------------
+before_action :find_book                                      <- перед загрузкой любого блока, находить книгу
+before_action :find_book, only: [:show]                       <- после цикла :find_book, обрабатываться могут блоки что в скобочках! Без этого цикла, не будут работать блоки [:show, :edit, :update, :destroy] и т.д., смотря что включено
+before_action :authenticate_user!, only: [:new, :edit]        <- не зарегестрированным пользователям, не давать доступ к блокам :new/:edit
+:only                                                         - опция :only используется для пропуска фильтра только для этих экшнов
+:except                                                       - опция :except, которая работает наоборот. Эти опции можно использовать и при добавлении фильтров, поэтому необходимо добавить фильтр, который запускается только для выбранных экшнов в первую очередь
+before_action :authenticate_user!, :except => [:index]        - 
+
+-----------------
+skip_before_action :require_login, only: [:new, :create]      <- вы можете не допустить запуск этого фильтра перед определенными экшнами с помощью skip_before_action
+
+
+************************************        # Коддинг
+validates                                   - обозначает, что данные обязаны быть заполненны (validates :name, presence: true)
+params.require(:xxx).permit(:x, :y)         - подключение зависимого ресурса :xxx - require(:xxx), permit(:x, :y) - дали доступ к характеристикам xxx (к примеру {xxx => [x,y,z,c]})
+
+-----------------                           # дословно
+params.require(:book).permit(:title, :description, :author)   <- обращаемся_к_параметраметрам.которые_содержатся_в(:книге, название модели!).параметры_к_которым_дадим_доступ(:название, :описание, :автор)
+
+-----------------
+resource :xxx, only: [:x, :y]               - в ресурсе ххх, использовать ТОЛЬКО параметры :x, :y (к примеру {xxx => [x,y,z,c]})
+
+-----------------
+joe = User.new( :name => "Sad Joe" )        # not saved
+bob = User.create ( :name => "Happy Bob" )  # saved    
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+II. Создание и варианты
+
+rails generate controller Books             - во множественном числе! Важно
+
+
+************************************        # работа с CONTROLLER (\app\cointrollers\books_controller.rb)
+class BooksController < ApplicationController
+
+-----------------                           # BEFORE_ACTION
+  before_action :find_book, only: [:show, :edit, :update, :destroy]   <- после цикла :find_book, обрабатываться могут блоки что в скобочках! Без этого цикла, не будут работать блоки [:show, :edit, :update, :destroy]
+  before_action :authenticate_user!, only: [:new, :edit]              <- не зарегестрированным пользователям, не давать доступ к блокам :new/:edit
+
+-----------------                           # INDEX
+  def index
+    if params[:category].blank?                           <- если параметр :category.заполнен?
+      @book = Book.all.order("created_at DESC")           <- выстроить в порядке возрастания (снизу вверх)
+    else
+      @category_id = Category.find_by(name: params[:category]).id                 <- @category_id присвоили из БД Category.найти_из(конкретное name из БД/параметра :category).его конкретное id(id - не обязательно, но так можно конкретнее)
+      @book = Book.where(:category_id => @category_id).order("created_at DESC")   <- БД Book.где(:category_id содержит переменную @category_id как эта(можно еще записать вот так category_id: @category_id)).вывести книги снизу вверх
+    end
+  end
+
+-----------------                           # NEW
+  def new
+    @book = Book.new                                      <- присваиваем к значению нашу БД
+    @book = current_user.books.build                      <- @book = Book.new, дали права - конкретному пользователю создавать книги
+    @categories = Category.all.map{ |c| [c.name, c.id] }  <- метод .map принимает перечислимый объект и блок и запускает блок для каждого элемента ([1, 2, 3].map { |n| n * n } #=> [1, 4, 9])
+  end
+
+-----------------                           # CREATE
+  def create
+    @book = Book.new(book_params)           <- @book - присваиваем БД Book.new(запускается цикл, что ниже напишем)
+    @c = Client.new params[:client]         <- это вызвался хеш {'name' => '', 'phone' => '', 'datestamp' => '', 'barber' => '', 'color' => ''}
+
+    @book = current_user.books.build(book_params)   <- @book = Book.new(book_params), дали права - конкретному пользователю создавать книги
+    @book.category_id = params[:category_id]        <- category_id БД книги = параметру :category_id который выберем при создании
+
+    if @book.save                           <- последовательность действий, если происходит сохранение
+      redirect_to root_path                 <- возврат_в корень_сайта
+    else
+      render 'new'                          <- возврат на страницу новой книги (render() генерирует HTML, redirect() перенаправляет на другой адрес)
+    end
+  end
+
+-----------------                           # SHOW
+  def show                                  <- блок show (ниже все варианты блоков будут расписаны)
+    @book = Book.find(params[:id])          <- находим конкретную книгу
+  end
+
+-----------------                           # EDIT
+  def edit
+    @categories = Category.all.map{ |c| [c.name, c.id] }  <- метод .map принимает перечислимый объект и блок и запускает блок для каждого элемента ([1, 2, 3].map { |n| n * n } #=> [1, 4, 9])
+  end
+
+-----------------                           # UPDATE
+  def update                                <- блок update (ниже все варианты блоков будут расписаны)
+    @book.category_id = params[:category_id] <- category_id БД книги = параметру :category_id который выберем при редактировании
+
+    if @book.update(book_params)            <- ставаим условие и даём доступ к конкретным данным
+      redirect_to book_path(@book)          <- вернуться_на конкретную книгу, которую редактировали
+    else
+      render 'edit'                         <- вернуться_на страницу книги, которую хотели отредактировать
+    end
+  end
+
+-----------------                           # DESTROY
+  def destroy                               <- блок show (ниже все варианты блоков будут расписаны)
+    @book.destroy                           <- удалить конкретную книгу (как мы к ней приходим? - через цепочку событий, пока не вышли на удаление!)
+    redirect_to root_path                   <- вернуться в корень сайта
+  end
+
+-----------------                           # PARAMETRS
+  private                                   <- устанавливаем доступ к данным
+
+    def book_params                         <- задаём цикл book_params для присвоения определенных данных
+      params.require(:book).permit(:title, :description, :author) <- обращаемся_к_параметраметрам.которые_содержатся_в(:книге, название модели!).параметры_к_которым_дадим_доступ(:название, :описание, :автор)
+    end
+
+    def find_book                           <- задаём цикл find_book для поиска определённой книги
+      @book = Book.find(params[:id])        <- определяем книгу
+    end
+
+end
+
+
+************************************        # работа с CONTROLLER (\app\cointrollers\rewiews_controller.rb) который связан с CONTROLLER Books
+class ReviewsController < ApplicationController
+
+-----------------                           # BEFORE_ACTION
+  before_action :find_book                                      <- перед загрузкой любого блока, находить книгу
+  before_action :find_review, only: [:edit, :update, :destroy]  <- найти отзыв, давать доступ к [:edit, :update, :destroy]
+  before_action :authenticate_user!, only: [:new, :edit]        <- не зарегестрированным пользователям, не давать доступ к блокам [:new, :edit]
+
+-----------------                           # NEW
+  def new
+    @review = Review.new                    <- присваиваем к значению новый отзыв
+  end
+
+-----------------                           # CREATE
+  def create
+    @review = Review.new(review_params)     <- присваиваем к значению отзыва конкретные данные
+    @review.book_id = @book.id              <- отзыва book_id должно совпадать с @book.id
+    @review.user_id = current_user.id       <- отзыва user_id должно совпадать с нынешним пользователем
+
+    if @review.save
+      redirect_to book_path(@book)
+    else
+      render 'new'
+    end
+  end
+
+-----------------                           # EDIT
+  def edit
+  end
+
+-----------------                           # UPDATE
+  def update
+    @review = Review.find(params[:id])      <- присваиваем к значению отзыва конкретный отзыв
+
+    if @review.update(review_params)
+      redirect_to book_path(@book)
+    else 
+      render 'edit'
+    end
+  end
+
+-----------------                           # DESTROY
+  def destroy
+    @review.destroy
+
+    redirect_to book_path(@book)
+  end
+
+-----------------                           # PARAMETRS
+  private
+
+  def review_params
+    params.require(:review).permit(:rating, :comment)
+  end
+
+  def find_book
+    @book = Book.find(params[:book_id])     <- присваиваем к значению книги конкретную книгу
+  end
+
+  def find_review
+    @review = Review.find(params[:id])      <- присваиваем к значению отзыва конкретный отзыв
+  end
+end
+************************************************************************************************************
+************************************************************************************************************

@@ -1,0 +1,158 @@
+I. Определения
+
+************************************        # 
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+
+II. Кодинг
+
+************************************        # работа с layouts (app\views\layouts\application.html.erb)
+  <body>
+    <nav class="nav-bar navbar-default">    <- создаём навигационную понель (меню страницы)
+      <div class="container">               <- создали контейнер, в который будут входить элементы
+
+        <div class="navbar-header">         <- расположение отсека (left|right|header и т.д.)
+          <%= link_to "Список книг", root_path, class: "navbar-brand" %>  <- ссылка на переход в корень страницы
+        </div>
+
+        <ul class="nav navbar-nav">         <- следующая лишка, будет смещаться вправо от предыдущей
+          <li><%= link_to "Регистрация", new_user_registration_path %></li>   <- ссылка на переход регистрации нового пользователя
+          <% if user_signed_in? %>          <- условия отображения на вход/выход пользователя
+            <li><%= link_to "Выйти", destroy_user_session_path, method: :delete %></li>   <- ссылка на переход выхода пользователя
+          <% else %>
+            <li><%= link_to "Войти", new_user_session_path %></li>  <- ссылка на переход Входа пользователя
+          <% end %>
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right">  <- расположение отсека (left|right|header и т.д.)
+          <% if user_signed_in? %>          <- условия отображения на вход/выход пользователя
+            <li><%= link_to "Добавить книгу", new_book_path %></li>   <- ссылка на переход новой книги
+          <% end %>
+        </ul>
+
+      </div>
+    </nav>
+
+    <p class="notice"><%= notice %></p>     <- 
+    <p class="alert"><%= alert %></p>       <- 
+
+    <div class="container">                 <- взяли в контейнер, для ровных отступов слева и справа!
+      <%= yield %>
+    </div>
+
+  </body>
+
+  
+************************************        # работа с layouts
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>  
+
+    <title>Books</title>
+    <%= csrf_meta_tags %>
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+    <nav class="nav-bar navbar-default">
+      <div class="container">
+
+        <div class="navbar-header">
+          <%= link_to "Список книг", root_path, class: "navbar-brand" %>
+        </div>
+
+        <ul class="nav navbar-nav">
+          <li><%= link_to "Регистрация", new_user_registration_path %></li>
+
+          <% if user_signed_in? %>
+            <li><%= link_to "Выйти", destroy_user_session_path, method: :delete %></li>
+          <% else %>
+            <li><%= link_to "Войти", new_user_session_path %></li>
+          <% end %>
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right">                                                    <- 
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"> Жанр <span class="caret"></span></a> <- 
+            <ul class="dropdown-menu" role="menu">                                                  <- 
+
+              <% Category.all.each do |category| %>                                                 <- 
+                <li class="<%= 'active' if params[:category] == category.name %>">                  <- 
+                  <%= link_to category.name, books_path(category: category.name), class: "link" %>  <- 
+                </li>
+              <% end %>
+            </ul>
+          </li>
+
+          <% if user_signed_in? %>
+            <li><%= link_to "Добавить книгу", new_book_path %></li>
+          <% end %>
+        </ul>
+              
+      </div>
+    </nav>
+
+    <p class="notice"><%= notice %></p>
+    <p class="alert"><%= alert %></p>
+
+    <div class="container">
+      <%= yield %>
+    </div>
+
+  </body>
+</html>
+
+
+  
+************************************        # как правильно добавлять ссылку
+<a href="/articles">Show all articles</a>                              - так можно - но так не правильно (если поменяется что-то, то она будет битой)
+<%= link_to 'Show all articles', articles_path %>                      - правильное добавление ссылки
+<%= link_to 'Show', article_path(article) %>                           - article (это :id конкретное) в контексте <% @articles.each do |article| %>
+<%= link_to 'Sign Out!', destroy_user_session_path, method: :delete %> - в этом варианте, нужно добавить конкретный метод! (смотреть какой путь идёт в табличке!) у нас на выход был метод DESTROY - он же и delete, это нужно указать! method: :delete
+
+
+************************************        # как правильно связывать сущности
+<%= form_for([@article, @article.comments.build]) do |f| %> - Форма которая создаётся для связанных друг с другом сущностей (получится /articles/3/comments)
+@article.comments.build                                     - коллекция Collection
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+
+
+
+
+
+
+************************************        # bootstrap
+В 1row - 12 col!
+col-xs                                      - самый маленький девайс (телефон) P.S. указав самый маленький размер - на остальных размерах, будут параметры сохранены!
+col-sm                                      - 750px
+col-md                                      - 970px
+col-lg                                      - 1170px
+
+col-lg-6                                    - означает, что мы в ряде, присвоили границы в 6 колон из 12
+visible-xs-block                            - отображать, что-то только на самом маленьком устройстве, на других не будет отображаться
+
+-----------------
+<div class="container">                     - сам контейнер, и всё что будет в нём
+  <div class="row">                         - разбитие сайта на столбцы
+    <div class="col-xs-12">                 - разбитие столбца - на колоны. (xs, sm, md, lg) - размерность экрана
+      <h1>Hello Plunker!</h1>
+    </div>
+  </div>
+</div>
+
+-----------------
+<div class="visible-xs-block"
+  Hi mate
+</div>
+************************************

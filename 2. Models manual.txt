@@ -1,0 +1,87 @@
+I. Определения, создание
+
+************************************        # Определения
+rails generate model НАЗВАНИЕ название_характеристики:параметр_её и т.д.
+rake db:migrate                                         - (cmd) запустить миграцию
+
+-----------------                           # варианты параметров (datatypes)
+:string                                     - строка
+:text                                       - все символы
+:integer                                    - цифры
+:varchar                                    - у varchar 255 символов
+:float                                      - 
+:date                                       - 
+
+-----------------                           # варианты связей с другими БД
+belongs_to :user                            - обозначили связь с пользователем (для книги как пример)
+has_one :books                              - обозначили, что в моделе (к примеру пользователь), может быть только одна :books (ограничение к примеру)
+has_many :books                             - обозначили, что в моделе (к примеру пользователь), может быть много значений :books
+
+-----------------
+article:references                          - взаимоотношение между сущностями + добавить в модель(article.rb), с чем связыкаешь комманду has_many :comments
+
+
+************************************        # примеры созданий БД
+rails generate model Contact email:string message:text  - (cmd) создаём модель с услоаиями (можно сразу, можно потом изменить в самой таблице), в данном случае email:string и message:text
+rails g model Contact email:string message:text         - (cmd) сокращённый вариант
+rake db:migrate                                         - (cmd) запустить миграцию
+
+-----------------
+rails g model Contact email:string message:text
+rails g model Article title:string text:text
+rails g model Comment author:string body:text article:references  <- ВАЖНО: article:references, означает, что Comment привязан к конкретному arcticle (Создаёт модель (\app\models\comment.rb) и добавляет условие: belongs_to :article внутри фаила) + добавить самому в модель(article.rb), связывающую комманду has_many :comments
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+II. Работа с моделями
+
+************************************        # связываем модель Book с моделью User
+class Book < ApplicationRecord
+  belongs_to :user                          <- обозначили связь с пользователем, для книги
+  belongs_to :category                      <- обозначили связь книги с категорией
+  has_many :reviews
+
+  has_attached_file :book_img, styles: { book_index: "250x350>", book_show: "325x475>" }, default_url: "/images/:style/missing.png"
+  validates_attachment_content_type :book_img, content_type: /\Aimage\/.*\z/
+end
+
+
+************************************        # связываем модель User с моделью Book
+class User < ApplicationRecord
+  has_many :books                           <- обозначили, что в пользователе, может быть много значений :books
+  has_many :reviews
+
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable
+end
+
+
+************************************        # связываем модель Category с моделью Book
+class Category < ApplicationRecord
+  has_many :books
+end
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+************************************************************************************************************
+************************************************************************************************************
+************************************        # 

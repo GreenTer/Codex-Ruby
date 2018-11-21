@@ -1,0 +1,336 @@
+http://matchers.shoulda.io/docs/v3.1.1/Shoulda/Matchers/ActiveModel.html        - manual
+https://www.sitepoint.com/learn-the-first-best-practices-for-rails-and-rspec/   - иснтрукция по фиксу ошибок и правильной установке!
+http://www.rubydoc.info/gems/factory_girl/file/GETTING_STARTED.md               - gem 'factory_bot_rails'
+https://github.com/teamcapybara/capybara                                        - gem 'capybara'
+
+I. Установка всех гемов + (cmd) Нужные комманды
+
+-----------------                     # Gemfile
+group :development, :test do
+  gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+
+  gem 'capybara', '~> 2.13'
+  gem 'selenium-webdriver'
+
+  gem 'rspec-rails'
+  gem 'shoulda'
+  gem 'shoulda-matchers'
+  gem 'database_cleaner'
+  gem 'factory_bot_rails'
+end
+
+-----------------                     # если вылезли ошибки
+  gem uninstall bcrypt                - удалить гем
+  gem install bcrypt --platform=ruby  - переустанавливаем гем вручную!
+  bundle install                      - подгоняем все гемы друг под дружку
+  rails g                             - если ошибок нет, то этой командой будет всё видно!
+
+-----------------                     # последовательность действий
+gem install rspec                     - для тестов кода
+rails g rspec:install                 - создать папки rspec
+
+-----------------                     # добавить в фаил rails_helper.rb, либо создать новый фаил, и в тесте его подключать require 'имя фаила'
+require 'shoulda/matchers'
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
+end
+
+-----------------                     # создаёт в папке spec/models + фаил contact_spec.rb
+rails g rspec:model contact
+
+
+************************************  # настройка factory_bot_rails
+RSpec.configure do |config|                     - создать папку + фаил в spec/support/factory_bot.rb
+  config.include FactoryBot::Syntax::Methods    - в тесте добавлять require 'support/factory_bot' (FactoryBot мб поменять придётся)
+end
+
+
+************************************  # план
+1. #arrange                           - подготовка сущности, которую будем проверять
+  car = Car.new
+2. #act                               - какое действие производится с сущностью
+  result = car.add_fuel 10
+3. #assert                            - что должны получить в результате
+  expect(result)
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+II. Определения
+
+-----------------
+rspec имяфаила.rb --color                   - для запуска теста
+
+-----------------
+describe "..." do
+  something                                 - валидация к примеру
+  #method                                   - instance method
+  .method                                   - class method
+  self.method                               - class method
+end
+
+-----------------
+it { should validate_presence_of :email }   - она, должна проверять присутствие :email
+it { should have_many(:comments) }          - проверка (has_many :comments    # связали с БД Comment)
+it { should belong_to(:article) }           - проверка (belongs_to :article) зависимости комментариев от темы
+
+-----------------
+describe КЛАСС do                           - над каким классом будет производиться тест
+it "НАЗВАНИЕ" do                            - пишется название/заголовок, что будем тестировать
+expect(навзвание метода).to eq РЕЗУЛЬТАТ    - expect(@hero.name).to eq 'Mike'   # hero.name == 'Mike'
+
+
+************************************************************************************************************
+************************************************************************************************************
+
+
+
+III. Пример коддинга
+
+************************************  # Пример 1
+
+-----------------                     # фаил который будем тестировать
+class Hero
+  def initialize(name, health=100)
+    @name = name.capitalize
+    @health = health
+  end
+
+  def name
+    @name
+  end
+
+  def power_up
+    @health += 10
+  end
+
+  def power_down
+    @health -= 10
+  end
+
+  def hero_info
+    "#{@name} has a health of #{@health}"
+  end
+end
+
+-----------------                     # фаил который тестирует
+require './hero'                      - путь к фаилу - который тестируется
+
+describe Hero do                      - рефакторинг (т.к. в методах, он будет часто повторяться)
+  before do
+    @hero = Hero.new 'mike'
+  end
+
+  it "has a capitalized name" do      - пишется название/заголовок, что будем тестировать
+    expect(@hero.name).to eq 'Mike'   - hero.name == 'Mike'
+  end
+
+  it "can power up" do
+    expect(@hero.power_up).to eq 110  - expect(над чем будет произведен тест).to eq (еквивалентно, т.е. какой должен получиться результат)
+  end
+
+  it "can power down" do
+    expect(@hero.power_down).to eq 90
+  end
+
+  it "display full hero info" do
+    expect(@hero.hero_info).to eq 'Mike has a health of 100'
+  end
+end
+
+
+************************************  # Пример 2
+
+-----------------                     # что будем обрабатывать!
+class Contact < ApplicationRecord
+  validates :email, presence: true
+  validates :message, presence: true
+end
+
+-----------------                             # создаём обработчик
+require 'spec_helper'
+require 'rails_helper'
+require 'shoulda/matchers'
+
+describe Contact, type: :model do             - , type: :model - добавлять, не обязательно! (describe Contact do)
+  it { should validate_presence_of(:email) }  - она, должна проверять присутствие :email
+  it { should validate_presence_of :message } - так оформлять, тоже можно
+end
+
+
+************************************                # Пример работы с factory_bot
+
+-----------------                                   # что будем обрабатывать!
+class Article < ApplicationRecord
+  has_many :comments                                # связали с БД Comment
+
+  validates :title, presence: true
+  validates :text, presence: true
+
+  def subject
+    title
+  end
+
+  def last_comment
+    comments.last
+  end
+end
+
+-----------------                                   # создаём генератор комментариев
+FactoryBot.define do
+  factory :comment do
+    author "Borovitsky"
+    sequence(:body) { |n| "comment body #{n}" }
+  end
+end
+
+-----------------                                   # создаём генератор статей + статей с комментариями
+FactoryBot.define do
+  factory :article do
+    title "Article title"
+    text "Article text"
+
+    factory :article_with_comments do               # создаём фабрику с название :article_with_comments для создания статьи с несколькими комментариями
+      after :create do |article, avaluator|         # после создания article
+        create_list :comment, 3, article: article   # создаём список из 3х комментариев
+      end
+    end
+  end
+end
+
+-----------------                                   # создаём обработчик (всего) валидации, связи с комментариями, проверка созданной статьи
+require 'spec_helper'
+require 'rails_helper'
+require 'support/factory_bot'
+
+describe Article do
+  describe 'assotiation' do
+  it { should have_many(:comments) }                # на проверку связи с комментариями
+  end
+
+  describe 'validations' do
+  it { should validate_presence_of(:title) }        # на проверку заголовка статьи
+  it { should validate_presence_of(:text) }         # на проверку текста статьи
+  end
+
+  describe "#subject" do
+    it "returns the article title" do
+      article = create(:article, title: 'Lorem Ipsum') # создаём объект article, хитрым способом
+
+      expect(article.subject).to eq 'Lorem Ipsum'      # assert, проверка
+    end
+  end
+
+  describe "#last_comment" do
+    it 'returns the last comment' do
+      article = create(:article_with_comments)         # создаём статью, но в этот рас с коментариями
+
+      expect(article.last_comment.body).to eq "comment body 3" # проверка
+    end
+  end
+end
+
+
+************************************                # Пример работы с 'capybara'  i18n !!!
+
+-----------------                                   # что будем обрабатывать! (L47\app\views\contacts\new.html.erb)
+<h1>Связь с нами</h1>
+
+<%= form_for :contact, url: contacts_path do |f| %>
+  <% if @contact && @contact.errors.any? %>
+  <p>
+    <ul>
+      <% @contact.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </p>
+  <% end %>
+
+  <p>
+    <%= f.label :email %><br/>
+    <%= f.text_field :email %>
+  </p>
+
+  <p>
+    <%= f.label :message %><br/>
+    <%= f.text_area :message %>
+  </p>
+
+  <p>
+    <%= f.submit %>
+  </p>
+<% end %>
+
+-----------------                                   # создаём обработчик (L47\spec\features\visitor_create_contact_spec.rb)
+require 'spec_helper'
+require 'rails_helper'
+
+feature 'Contact creation' do
+  scenario 'allows accees to contact page' do
+    visit '/contacts'                               # проверка на наличие страницы /contacts
+
+    expect(page).to have_content I18n.t 'contacts.contact_us' # наличие такого-то текста 'Связь с нами' или связь с i18n
+  end
+
+  scenario "allows a guest to create contact" do
+    visit '/contacts'
+
+    fill_in :contact_email, :with => 'user@exemple.com'       # не забываем подсматривать в код страницы - за названием той или иной переменной
+    fill_in :contact_message, :with => 'something'
+
+    click_button 'Save Contact'
+  end
+end
+end
+
+require 'spec_helper'
+require 'rails_helper'
+
+feature 'Contact creation' do
+  scenario 'allows arees to contact page' do
+
+
+    expect(page).to have_content 'Связь с нами'     
+  end
+end
+
+-----------------                                   # вносим изменения для I18n (L47\config\locales\en.yml)
+en:
+  hello: "Hello world"
+
+  contacts:
+    contact_us: "Связь с нами!"
+
+-----------------                                   # как обработали! (L47\app\views\contacts\new.html.erb)
+<h1><%= t('contacts.contact_us') %></h1>
+
+<%= form_for :contact, url: contacts_path do |f| %>
+  <% if @contact && @contact.errors.any? %>
+  <p>
+    <ul>
+      <% @contact.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </p>
+  <% end %>
+
+  <p>
+    <%= f.label :email %><br/>
+    <%= f.text_field :email %>
+  </p>
+
+  <p>
+    <%= f.label :message %><br/>
+    <%= f.text_area :message %>
+  </p>
+
+  <p>
+    <%= f.submit %>
+  </p>
+<% end %>

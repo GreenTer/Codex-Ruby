@@ -1,0 +1,116 @@
+P.S. Урок 45  00:00 Time  - Code The problem with your code is that it's doing exactly what you told it to do. : )
+refactoring               - перепроектирование кода, переработка кода, равносильное преобразование алгоритмов — процесс изменения внутренней структуры программы, не затрагивающий её внешнего поведения и имеющий целью облегчить понимание её работы.
+extract variable          - выделение отдельной переменной
+
+-----------------                           # Уроки
+https://github.com/ro31337/rubyschool/blob/master/README.md                             # что в уроках
+https://github.com/ro31337/rubyschool                                                   # задания
+https://github.com/arbox/ruby-style-guide/blob/master/README-ruRU.md#ternary-operator   # изучить!
+
+
+************************************        # Рабочая среда
+1. subline / Far                            - рабочая среда
+2. start ungit                              - запуск в отдельном окне git
+3. start ruby app.rb                        - запуск в отдельном окне сам сайт
+  - start rails s                           - запустить в отдельном окне сам сайт
+
+-----------------
+start ungit                                 - запустить в отдельном окне git
+git pull                                    - загрузить изменения
+git clone                                   - копировать репозиторий
+wget --no-check-certificate                 - скачать фаил без сертификата
+
+
+************************************        # Знания
+
+-----------------                           # Ruby
+https://ru.wikibooks.org/wiki/Ruby                                                      # (rus) Ruby manual
+http://rusrails.ru/search?utf8=%E2%9C%93&search=JSON                                    # (rus) Ruby manual
+https://github.com/arbox/ruby-style-guide/blob/master/README-ruRU.md#ternary-operator   # как правильно оформлять код (ruby naming conventions)
+
+http://phrogz.net/programmingruby/tut_classes.html                                      # (eng) Ruby manual
+http://www.tutorialspoint.com/ruby/ruby_modules.htm                                     # (eng) Ruby manual mixin
+
+-----------------                           # Active-record
+https://yiiframework.com.ua/ru/doc/guide/2/db-active-record/                            # Active-record manual rus (+ смотреть API)
+http://api.rubyonrails.org/classes/ActiveRecord/Migration.html                          # Active-record migration
+http://guides.rubyonrails.org/active_record_validations.html                            # Validation правила которые ты хочешь установить параметрам и т.
+
+-----------------                           # Web
+https://www.heroku.com/                                                                 # сайт для заливки своего приложения (бесплатный домен)
+
+-----------------                           # полезное
+neumerate window.localStorage site:stackoverflow.com                                    # пример, как искать в google
+
+-----------------                           # виртуальная машина
+https://eax.me/vagrant/                                                                 
+https://putshello.wordpress.com/2015/03/03/easy-rails-with-vagrant-virtualbox-on-windows
+
+-----------------                           # Fiddler
+Fiddler (Charless proxy --for Mac)    # программа, которая показывает всё что происходит при общении с сервером!!  31 урок 28 минута
+URL undecoder                         # читать фидлер запросы и т.д.
+
+
+
+############# КОДИНГ ###############
+************************************
+hh = {
+  :user_name => "Введите имя",
+  :user_phone => "Введите телефон",
+  :user_time => "Введите дату и время"}
+
+@error = hh.select{|key,_| params[key] ==""}.values.join(", ") # .join добавляtет в конце value (", ") и т.д. цикл выводит все значения value1, value2, value3 если они пустые*
+разницы нет как называть _ или value - просто если переменная не используется, принято ее начинать с underscore ( _ ). Например: _foo или _bar. Можно написать _value - это ни на что не повлияет
+
+1.0 @error = hh.select                                              # выбирает и обрабатывает хеш hh
+1.1 @error = hh.select{|key,_| params[key] ==""}.values             # если key(один из трёх) и его параметр (value) - равен пустому значению, тогда выводить value данного ключа(key)
+1.2 @error = hh.select{|key,_| params[key] ==""}.values.join(", ")  # .join добавляtет в конце value (", ") и т.д. цикл выводит все значения value1, value2, value3 если они пустые*
+  .select... # выбирает значения по определенному словию, выдает хеш
+  .values # получает из хеша только ключи, выдает массив
+  .join... # соединяет массив в строку с разделителем (запятая)
+
+if @error != ''
+  return erb :visit
+end
+************************************************************************************************************
+
+
+Вариант 1 + 1.1
+<select name="barber" class="form-control">
+<!-- 
+  <option <%= @barber == 'Александр Евгеньевич' ? 'selected' : '' %>>Александр Евгеньевич</option>
+  <option <%= @barber == 'Лев Александрович' ? 'selected' : '' %>>Лев Александрович</option>
+  <option <%= @barber == 'Дарья Олеговна' ? 'selected' : '' %>>Дарья Олеговна</option>
+  <option <%= @barber == 'Олег Евгеньевич' ? 'selected' : '' %>>Олег Евгеньевич</option>
+  <option <%= @barber == 'Елена Георгиевна' ? 'selected' : '' %>>Елена Георгиевна</option>
+-->
+  <% @barbers.each do |item| %>
+    <option <%= @barber == item['name'] ? 'selected' : '' %> ><%= item['name'] %></option>
+  <% end %>
+</select>
+       ###########       ###########       ###########
+
+Вариант 2
+<select name="client[barber]" class="form-control" value="<%= @c.barber %>">
+
+  <% @barbers.each do |barber| %>
+    <option <%= @c.barber == barber.name ? 'selected' : '' %>><%= barber.name %></option> <----- помогите расписать эту строку (вариант 3 расписывает)
+  <% end %>
+
+</select>
+       ###########       ###########       ###########
+
+Вариант 3
+<select name="client[barber]" class="form-control" value="<%= @c.barber %>">
+
+  <% @barbers.each do |barber| %>
+    
+    <% if @c.barber == barber.name %>
+        <option selected><%= barber.name %></option>
+    <% else %>
+      ""                                              # пустое значение
+        <option><%= barber.name %></option>
+    <% end %>
+  <% end %>
+</select>
+************************************************************************************************************
